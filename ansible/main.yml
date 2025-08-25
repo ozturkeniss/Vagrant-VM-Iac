@@ -1,0 +1,104 @@
+---
+- name: Local VM Konfigürasyonu
+  hosts: local_vms
+  become: yes
+  gather_facts: yes
+  
+  tasks:
+    - name: Sistem güncellemesi
+      apt:
+        update_cache: yes
+        upgrade: yes
+      tags: [system, update]
+    
+    - name: Gerekli paketleri yükle
+      apt:
+        name:
+          - nginx
+          - docker.io
+          - python3-docker
+          - tree
+          - htop
+          - vim
+          - git
+        state: present
+      tags: [packages, install]
+    
+    - name: Docker servisini başlat ve etkinleştir
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      tags: [docker, service]
+    
+    - name: Nginx servisini başlat ve etkinleştir
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      tags: [nginx, service]
+    
+    - name: Nginx default sayfasını özelleştir
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <title>Terraform + Ansible + Vagrant Demo</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; }
+                  .container { max-width: 800px; margin: 0 auto; }
+                  .header { background: #2c3e50; color: white; padding: 20px; border-radius: 5px; }
+                  .content { background: #ecf0f1; padding: 20px; margin: 20px 0; border-radius: 5px; }
+                  .status { background: #27ae60; color: white; padding: 10px; border-radius: 3px; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🚀 Terraform + Ansible + Vagrant Demo</h1>
+                      <p>IaC Project Running on Local VM</p>
+                  </div>
+                  <div class="content">
+                      <h2>✅ System Status</h2>
+                      <div class="status">VM Successfully Configured!</div>
+                      <h3>📋 Installed Services:</h3>
+                      <ul>
+                          <li>Nginx Web Server</li>
+                          <li>Docker Container Engine</li>
+                          <li>Python3 and pip</li>
+                          <li>Git, Vim, Tree, Htop</li>
+                      </ul>
+                      <h3>🔧 Technologies Used:</h3>
+                      <ul>
+                          <li>Vagrant - VM Management</li>
+                          <li>Terraform - Infrastructure as Code</li>
+                          <li>Ansible - Configuration Management</li>
+                      </ul>
+                  </div>
+              </div>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      tags: [nginx, config]
+    
+    - name: Docker test container'ı çalıştır
+      docker_container:
+        name: hello-world
+        image: hello-world
+        state: started
+      tags: [docker, test]
+    
+    - name: Sistem bilgilerini göster
+      debug:
+        msg: |
+          VM başarıyla konfigüre edildi!
+          - Hostname: {{ ansible_hostname }}
+          - IP: {{ ansible_default_ipv4.address }}
+          - OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          - Kernel: {{ ansible_kernel }}
+      tags: [info]

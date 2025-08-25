@@ -1,0 +1,7 @@
+VM Bilgileri:
+- Hostname: terraform-ansible-vm
+- IP: 192.168.56.10
+- Memory: 2GB
+- CPU: 2 cores
+- OS: Ubuntu 22.04 LTS
+- SSH Port: 22

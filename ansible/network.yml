@@ -1,0 +1,265 @@
+---
+- name: Network Infrastructure Configuration
+  hosts: local_vms
+  become: yes
+  gather_facts: yes
+  
+  tasks:
+    - name: Network monitoring araçlarını yükle
+      apt:
+        name:
+          - net-tools
+          - iftop
+          - nethogs
+          - tcpdump
+          - iperf3
+          - nmap
+          - wireshark-qt
+          - vnstat
+        state: present
+      tags: [network, tools]
+    
+    - name: Network log dizinlerini oluştur
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - /var/log/network
+        - /var/log/connections
+        - /etc/network/scripts
+      tags: [network, directories]
+    
+    - name: Network monitoring script'ini oluştur
+      copy:
+        content: |
+          #!/bin/bash
+          # Network monitoring script
+          
+          LOG_FILE="/var/log/network/network-status.log"
+          DATE=$(date '+%Y-%m-%d %H:%M:%S')
+          
+          echo "=== Network Status Report - $DATE ===" >> $LOG_FILE
+          
+          # Network interfaces
+          echo "Network Interfaces:" >> $LOG_FILE
+          ip addr show >> $LOG_FILE
+          
+          # Routing table
+          echo "Routing Table:" >> $LOG_FILE
+          ip route show >> $LOG_FILE
+          
+          # Network connections
+          echo "Active Connections:" >> $LOG_FILE
+          netstat -tuln >> $LOG_FILE
+          
+          # Bandwidth usage
+          echo "Bandwidth Usage:" >> $LOG_FILE
+          vnstat -i eth0 >> $LOG_FILE
+          
+          echo "================================" >> $LOG_FILE
+        dest: /usr/local/bin/network-monitor.sh
+        owner: root
+        group: root
+        mode: '0755'
+      tags: [network, scripts]
+    
+    - name: Network monitoring cron job ekle
+      cron:
+        name: "Network monitoring every 5 minutes"
+        minute: "*/5"
+        job: "/usr/local/bin/network-monitor.sh"
+        user: root
+      tags: [network, cron]
+    
+    - name: Firewall kurallarını yapılandır
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22"    # SSH
+        - "80"    # HTTP
+        - "443"   # HTTPS
+        - "3306"  # MySQL
+        - "5432"  # PostgreSQL
+        - "9090"  # Prometheus
+        - "3000"  # Grafana
+      tags: [network, firewall]
+    
+    - name: Firewall'u etkinleştir
+      ufw:
+        state: enabled
+        policy: deny
+      tags: [network, firewall]
+    
+    - name: Network performance test script'i oluştur
+      copy:
+        content: |
+          #!/bin/bash
+          # Network performance test
+          
+          echo "=== Network Performance Test ==="
+          echo "Date: $(date)"
+          echo ""
+          
+          # Ping test
+          echo "Ping Test (Gateway):"
+          ping -c 5 192.168.56.1
+          echo ""
+          
+          # DNS test
+          echo "DNS Test:"
+          nslookup google.com
+          echo ""
+          
+          # Bandwidth test
+          echo "Bandwidth Test (Local):"
+          iperf3 -s &
+          sleep 2
+          iperf3 -c 127.0.0.1 -t 10
+          pkill iperf3
+          echo ""
+          
+          # Port scan
+          echo "Port Scan (Local):"
+          nmap -sT -O localhost
+        dest: /usr/local/bin/network-test.sh
+        owner: root
+        group: root
+        mode: '0755'
+      tags: [network, scripts]
+    
+    - name: Network status sayfasını oluştur
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <title>Network Infrastructure Status</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                  .container { max-width: 1000px; margin: 0 auto; }
+                  .header { background: #2c3e50; color: white; padding: 20px; border-radius: 5px; }
+                  .content { background: white; padding: 20px; margin: 20px 0; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+                  .status { background: #27ae60; color: white; padding: 10px; border-radius: 3px; margin: 10px 0; }
+                  .warning { background: #f39c12; color: white; padding: 10px; border-radius: 3px; margin: 10px 0; }
+                  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                  .metric { background: #ecf0f1; padding: 15px; border-radius: 5px; }
+                  .metric h3 { margin-top: 0; color: #2c3e50; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🌐 Network Infrastructure Status</h1>
+                      <p>Real-time network monitoring and configuration</p>
+                  </div>
+                  
+                  <div class="content">
+                      <h2>📊 Network Overview</h2>
+                      <div class="status">Network Infrastructure Active and Monitoring</div>
+                      
+                      <div class="grid">
+                          <div class="metric">
+                              <h3>🌍 Network Configuration</h3>
+                              <ul>
+                                  <li><strong>Network:</strong> 192.168.56.0/24</li>
+                                  <li><strong>VM IP:</strong> 192.168.56.10</li>
+                                  <li><strong>Gateway:</strong> 192.168.56.1</li>
+                                  <li><strong>Subnet Mask:</strong> 255.255.255.0</li>
+                              </ul>
+                          </div>
+                          
+                          <div class="metric">
+                              <h3>🔌 Port Configuration</h3>
+                              <ul>
+                                  <li><strong>SSH:</strong> 22 → 2222</li>
+                                  <li><strong>HTTP:</strong> 80</li>
+                                  <li><strong>HTTPS:</strong> 443</li>
+                                  <li><strong>MySQL:</strong> 3306</li>
+                              </ul>
+                          </div>
+                      </div>
+                      
+                      <h2>🛡️ Security Status</h2>
+                      <div class="warning">Firewall Active - UFW Enabled</div>
+                      
+                      <h2>📈 Monitoring Tools</h2>
+                      <ul>
+                          <li><strong>Netstat:</strong> Network connections</li>
+                          <li><strong>Iftop:</strong> Real-time bandwidth</li>
+                          <li><strong>Nethogs:</strong> Process network usage</li>
+                          <li><strong>Tcpdump:</strong> Packet capture</li>
+                          <li><strong>Iperf3:</strong> Bandwidth testing</li>
+                      </ul>
+                      
+                      <h2>🔧 Quick Actions</h2>
+                      <p>Run these commands to test network:</p>
+                      <code>sudo /usr/local/bin/network-test.sh</code><br>
+                      <code>sudo /usr/local/bin/network-monitor.sh</code>
+                  </div>
+              </div>
+          </body>
+          </html>
+        dest: /var/www/html/network-status.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      tags: [network, web]
+    
+    - name: Network status sayfasına erişim için Nginx konfigürasyonu
+      copy:
+        content: |
+          server {
+              listen 80;
+              server_name network-status.local;
+              
+              location / {
+                  root /var/www/html;
+                  index network-status.html;
+              }
+              
+              location /network-status.html {
+                  alias /var/www/html/network-status.html;
+              }
+          }
+        dest: /etc/nginx/sites-available/network-status
+        owner: root
+        group: root
+        mode: '0644'
+      tags: [network, nginx]
+    
+    - name: Network status site'unu etkinleştir
+      file:
+        src: /etc/nginx/sites-available/network-status
+        dest: /etc/nginx/sites-enabled/network-status
+        state: link
+      tags: [network, nginx]
+    
+    - name: Nginx'i yeniden başlat
+      systemd:
+        name: nginx
+        state: restarted
+      tags: [network, nginx]
+    
+    - name: Network monitoring servisini başlat
+      systemd:
+        name: network-monitor
+        state: started
+        enabled: yes
+      tags: [network, services]
+    
+    - name: Network durumunu göster
+      debug:
+        msg: |
+          Network Infrastructure başarıyla konfigüre edildi!
+          - Network monitoring araçları kuruldu
+          - Firewall kuralları yapılandırıldı
+          - Network status sayfası: http://192.168.56.10/network-status.html
+          - Monitoring script'leri: /usr/local/bin/
+          - Log dosyaları: /var/log/network/
+      tags: [info]

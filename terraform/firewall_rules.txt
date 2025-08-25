@@ -1,0 +1,17 @@
+Firewall Rules Configuration
+============================
+
+Inbound Rules:
+- SSH (22): Allow from 192.168.56.0/24
+- HTTP (80): Allow from any
+- HTTPS (443): Allow from any
+- ICMP: Allow ping from 192.168.56.0/24
+
+Outbound Rules:
+- All traffic: Allow to any
+- DNS (53): Allow to 8.8.8.8, 8.8.4.4
+
+Security Groups:
+- Web Server: 80, 443, 22
+- Database: 3306 (MySQL), 5432 (PostgreSQL)
+- Monitoring: 9090 (Prometheus), 3000 (Grafana)

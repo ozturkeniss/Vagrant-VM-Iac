@@ -1,0 +1,23 @@
+Network Infrastructure Configuration
+===================================
+
+Primary Network:
+- Network: 192.168.56.0/24
+- Gateway: 192.168.56.1
+- Subnet Mask: 255.255.255.0
+- Broadcast: 192.168.56.255
+
+VM Network Configuration:
+- VM IP: 192.168.56.10
+- Hostname: terraform-ansible-vm
+- DNS Servers: 8.8.8.8, 8.8.4.4
+
+Port Configuration:
+- SSH: 22 (VM) -> 2222 (Host)
+- HTTP: 80 (VM) -> 80 (Host)
+- HTTPS: 443 (VM) -> 443 (Host)
+
+Network Services:
+- DHCP: Disabled (Static IP)
+- NAT: Enabled (VM -> Internet)
+- Host-only: 192.168.56.0/24

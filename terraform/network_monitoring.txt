@@ -1,0 +1,18 @@
+Network Monitoring Configuration
+================================
+
+Monitoring Tools:
+- Netstat: Network connections
+- Iftop: Network usage
+- Nethogs: Process network usage
+- Tcpdump: Packet capture
+
+Alerting:
+- High bandwidth usage: >100MB/s
+- Connection failures: >5/min
+- Latency threshold: >100ms
+
+Logging:
+- Network logs: /var/log/network/
+- Connection logs: /var/log/connections.log
+- Error logs: /var/log/network-errors.log
