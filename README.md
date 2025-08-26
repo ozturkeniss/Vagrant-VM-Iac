@@ -4,25 +4,8 @@ This project allows you to practice Infrastructure as Code (IaC) on a local VM w
 
 ## Architecture
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│    Vagrant      │    │    Terraform    │    │     Ansible     │
-│                 │    │                 │    │                 │
-│ • Create VM     │───▶│ • Infrastructure│───▶│ • Configuration │
-│ • Network       │    │   Management    │    │ • Package Install│
-│ • Provision     │    │ • File Creation │    │ • Service Start │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Local VM (Ubuntu 22.04)                     │
-│                                                                 │
-│ • IP: 192.168.56.10                                           │
-│ • Memory: 2GB                                                  │
-│ • CPU: 2 cores                                                │
-│ • Services: Nginx, Docker, SSH                                │
-└─────────────────────────────────────────────────────────────────┘
-```
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/be7f5e63-8b2d-441a-8c27-74c3aa3ab6aa" />
+
 
 ## Requirements
 
